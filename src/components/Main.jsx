@@ -228,11 +228,12 @@ const SocialActions = styled.div`
 
 function Main() {
   const [showModal, setShowModal] = useState(false);
+
   const user = useSelector((store) => store.userState.user);
   const isLoading = useSelector((store) => store.articelsState.isLoading);
 
   function handleClick() {
-    setShowModal(!showModal);
+    setShowModal((prev) => !prev);
   }
 
   return (

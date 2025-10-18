@@ -2,7 +2,6 @@ import styled from "styled-components";
 import Leftside from "./Leftside";
 import Main from "./Main";
 import Rightside from "./Rightside";
-import { useSelector } from "react-redux";
 
 const Container = styled.div`
   padding-top: 52px;

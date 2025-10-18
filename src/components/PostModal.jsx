@@ -1,8 +1,7 @@
-/* eslint-disable no-unused-vars */
-
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import ReactPlayer from "react-player";
 
 const Container = styled.div`
   position: fixed;
@@ -81,7 +80,7 @@ const UserInfo = styled.div`
   display: flex;
   align-items: center;
   padding: 12px 24px;
-  sv,
+  svg,
   img {
     width: 48px;
     height: 48px;
@@ -148,7 +147,7 @@ const ShareComment = styled.div`
 `;
 
 const PostButton = styled.button`
-  min-with: 60px;
+  min-width: 60px;
   padding-left: 16px;
   padding-right: 16px;
   background: ${(props) => (props.disabled ? "rgb(235,235,235)" : "#0a66c2")};
@@ -183,9 +182,25 @@ const UploadImage = styled.div`
   }
 `;
 
-function PostModal({ showModal, handleClick }) {
+const Input = styled.input`
+  display: none;
+`;
+
+const Label = styled.label`
+  cursor: pointer;
+  display: block;
+  margin-bottom: "15px";
+`;
+
+function PostModal({ showModal, handleClick, listenCapturing = true }) {
   const [editorText, setEditorText] = useState("");
+  const [assetArea, setAssetArea] = useState("");
+  const [shareImage, setShareImage] = useState("");
+  const [videoLink, setVideoLink] = useState("");
+  const ref = useRef();
+
   const textAreaRef = useRef(null);
+
   const user = useSelector((store) => store.userState.user);
 
   useEffect(() => {
@@ -194,26 +209,78 @@ function PostModal({ showModal, handleClick }) {
     }
   }, [showModal]);
 
+  function reset() {
+    setEditorText("");
+    setAssetArea("");
+    setShareImage("");
+    setVideoLink("");
+    handleClick();
+  }
+
+  function handleChange(e) {
+    const image = e.target.files[0];
+
+    if (!image) {
+      alert("Please select an image file!");
+      return;
+    }
+
+    if (!image.type.startsWith("image/")) {
+      alert(`Not an image! The file type is ${image.type}`);
+      return;
+    }
+
+    setShareImage(image);
+  }
+
+  function switchAssetArea(filed) {
+    setShareImage("");
+    setVideoLink("");
+    setAssetArea(filed);
+  }
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setEditorText("");
+        setAssetArea("");
+        setShareImage("");
+        setVideoLink("");
+        handleClick();
+      }
+    }
+
+    if (showModal) {
+      document.addEventListener("click", handleClickOutside, listenCapturing);
+      return () =>
+        document.removeEventListener(
+          "click",
+          handleClickOutside,
+          listenCapturing
+        );
+    }
+  }, [handleClick, listenCapturing, showModal]);
+
   return (
     <>
       {showModal && (
         <Container>
-          <Content>
+          <Content ref={ref}>
             <Header>
               <h2>Create a Post</h2>
-              <button onClick={handleClick}>
-                <img src="/images/close-icon.svg" alt="close icon" />
+              <button type="button" onClick={reset} aria-label="Close menu">
+                <img src="/images/close-icon.svg" alt="close menu" />
               </button>
             </Header>
 
             <ShareContent>
               <UserInfo>
-                {user?.photoURL ? (
-                  <img src={user?.photoURL} alt="user photo" />
+                {user ? (
+                  <img src={user.photoURL} alt="user photo" />
                 ) : (
                   <img src="/images/user.svg" alt="empty photo" />
                 )}
-                {user.displayName}
+                <span> {user.displayName}</span>
               </UserInfo>
               <Editor>
                 <textarea
@@ -221,9 +288,62 @@ function PostModal({ showModal, handleClick }) {
                   onChange={(e) => setEditorText(e.target.value)}
                   placeholder="what do you want to talk about"
                   ref={textAreaRef}
-                ></textarea>
+                />
+                {assetArea === "image" ? (
+                  <UploadImage>
+                    <Input
+                      type="file"
+                      name="image"
+                      id="file"
+                      onChange={handleChange}
+                    />
+                    <Label htmlFor="file">
+                      Click here to select an image to share
+                    </Label>
+                    {shareImage && (
+                      <img
+                        src={URL.createObjectURL(shareImage)}
+                        alt="image post"
+                      />
+                    )}
+                  </UploadImage>
+                ) : (
+                  assetArea === "media" && (
+                    <>
+                      <input
+                        style={{ width: "100%", height: "30px" }}
+                        type="text"
+                        value={videoLink}
+                        onChange={(e) => setVideoLink(e.target.value)}
+                        placeholder="Please input a video link"
+                      />
+                      {videoLink && (
+                        <ReactPlayer
+                          width="100%"
+                          height="300px"
+                          src={videoLink}
+                          controls
+                        />
+                      )}
+                    </>
+                  )
+                )}
               </Editor>
             </ShareContent>
+
+            <ShareCreation>
+              <AttachAssets>
+                <AssetButton onClick={() => switchAssetArea("image")}>
+                  <img src="/images/share-image.svg" alt="upload image" />
+                </AssetButton>
+                <AssetButton onClick={() => switchAssetArea("media")}>
+                  <img src="/images/share-video.svg" alt="upload image" />
+                </AssetButton>
+              </AttachAssets>
+
+              {/* <PostButton disabled={!editorText && !shareImage && !videoLink}> */}
+              <PostButton disabled={!editorText}>Post</PostButton>
+            </ShareCreation>
           </Content>
         </Container>
       )}
@@ -232,4 +352,3 @@ function PostModal({ showModal, handleClick }) {
 }
 
 export default PostModal;
-// 2.55.00

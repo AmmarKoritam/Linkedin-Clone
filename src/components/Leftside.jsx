@@ -162,9 +162,9 @@ function Leftside() {
       <ArtCard>
         <UserInfo>
           <CardBackground />
-          <a href="#">
+          <a>
             <Photo />
-            <Link>Welecome {userName ? userName : "there!"}</Link>
+            <Link>Welcome, {userName ? userName : "there!"}</Link>
           </a>
           <a href="#">
             <AddPhotoText>Add a photo</AddPhotoText>

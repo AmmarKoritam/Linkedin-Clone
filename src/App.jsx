@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 function App() {
   const dispatch = useDispatch();
 
+  // Tigger the login & logout and automatically updata the state in redux store
   useEffect(
     function () {
       const unsubscribe = auth.onAuthStateChanged(async (user) => {
