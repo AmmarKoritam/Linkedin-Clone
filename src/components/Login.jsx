@@ -138,6 +138,10 @@ const Google = styled.button`
   }
 `;
 
+const LoginTitle = styled.span`
+  margin-left: 10px;
+`;
+
 function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -176,7 +180,7 @@ function Login() {
         <Form>
           <Google onClick={handleLogin}>
             <img src="/images/google.svg" alt="Google logo" />
-            Sign in with Google
+            <LoginTitle>Sign in with Google</LoginTitle>
           </Google>
         </Form>
       </Section>

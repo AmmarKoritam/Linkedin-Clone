@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 
 export default function postArticlesAPI(payload) {
+  store.dispatch({ type: "set/isLoading/status", payload: true });
+
   if (payload.image) {
     // upload image to firebase storage
     const storageRef = ref(storage, `images/${payload.image.name}`);
@@ -45,6 +47,7 @@ export default function postArticlesAPI(payload) {
           shareImage: downloadURL,
           video: payload.video,
         });
+        store.dispatch({ type: "set/isLoading/status", payload: false });
       }
     );
   } else if (payload.video) {

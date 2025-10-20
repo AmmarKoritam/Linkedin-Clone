@@ -101,6 +101,8 @@ const NavListWrap = styled.ul`
 const NavList = styled.li`
   display: flex;
   align-items: center;
+  flex: 1;
+
   a {
     align-items: center;
     background: transparent;
@@ -120,7 +122,10 @@ const NavList = styled.li`
       align-items: center;
     }
     @media (max-width: 768px) {
-      min-width: 70px;
+      min-width: 60px;
+      span:nth-child(2) {
+        font-size: 10px;
+      }
     }
   }
   &:hover,

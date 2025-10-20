@@ -282,8 +282,6 @@ function PostModal({ showModal, handleClick, listenCapturing = true }) {
         timestamp: Timestamp.now(),
       };
 
-      dispatch({ type: "set/isLoading/status", payload: true });
-
       const articleId = await postArticlesAPI(payload);
 
       dispatch({
@@ -299,8 +297,6 @@ function PostModal({ showModal, handleClick, listenCapturing = true }) {
     } catch (error) {
       console.error("Failed to post article:", error);
       alert("Failed to post article: " + error.message);
-    } finally {
-      dispatch({ type: "set/isLoading/status", payload: false });
     }
   }
 
