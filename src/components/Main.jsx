@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import PostModal from "./PostModal";
+import ArticleItems from "./ArticleItems";
+import { getArticlesAPI } from "../service/articlesAPI";
+import { useEffect } from "react";
 
 const Container = styled.div`
   grid-area: main;
@@ -92,137 +95,19 @@ const Content = styled.div`
   }
 `;
 
-const Article = styled(CommonCard)`
-  padding: 0;
-  margin: 0 0 8px;
-  overflow: visible;
-`;
-
-const SharedActor = styled.div`
-  flex-wrap: nowrap;
-  padding: 12px 16px 0;
-  margin-bottom: 8px;
-  align-items: center;
-  display: flex;
-  a {
-    margin-right: 12px;
-    flex-grow: 1;
-    overflow: hidden;
-    display: flex;
-    text-decoration: none;
-
-    img {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-    }
-    & > div {
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      flex-basis: 0;
-      margin-left: 8px;
-      overflow: hidden;
-      span {
-        text-align: left;
-        &:first-child {
-          font-size: 14px;
-          font-weight: 700;
-          color: rgba(0, 0, 0, 1);
-        }
-        &:nth-child(2),
-        &:nth-child(3) {
-          font-size: 12px;
-          color: rgba(0, 0, 0, 0.6);
-        }
-      }
-    }
-  }
-  button {
-    position: absolute;
-    right: 12px;
-    top: 0;
-    background: transparent;
-    border: none;
-    ouline: none;
-  }
-`;
-
-const Description = styled.div`
-  padding: 0 16px;
-  overflow: hidden;
-  color: rgba(0, 0, 0, 0.9);
-  font-size: 14px;
-  text-align: left;
-`;
-
-const SharedImg = styled.div`
-  margin-top: 8px;
-  width: 100%;
-  diplay: block;
-  position: relative;
-  background-color: #f9fafb;
-  img {
-    object-fit: contain;
-    width: 100%;
-    height: 100%;
-  }
-`;
-
-const SocialCounts = styled.ul`
-  line-height: 1.3;
-  display: flex;
-  align-items: center;
-  overflow: auto;
-  margin: 0 16px;
-  padding: 8px 0;
-  border-bottom: 1px solid #e9e5df;
-  list-style: none;
-  li {
-    margin-right: 5px;
-    font-size: 12px;
-    button {
-      display: flex;
-      align-items: center;
-      border: none;
-      background-color: white;
-    }
-  }
-`;
-
-const SocialActions = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  max-width: 100%;
-  flex-wrap: wrap;
-  margin: 0;
-  min-height: 40px;
-  padding: 4px 8px;
-  button {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px;
-    color: rgba(0, 0, 0, 0.6);
-    border: none;
-    background-color: white;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background 0.3s;
-    width: calc(100% / 4);
-    height: 60px;
-    justify-content: center;
-
-    &:hover {
-      background: rgba(0, 0, 0, 0.08);
-    }
-    @media (min-width: 768px) {
-      span {
-        margin-left: 8px;
-        margin-top: 3px;
-        font-weight: 600;
-      }
-    }
+const EmtpyPosts = styled.p`
+  text-align: center;
+  font-size: 25px;
+  font-weight: 600;
+  background-color: #fff;
+  width: max-content;
+  margin: 60px auto;
+  padding: 20px 40px;
+  border-radius: 50px;
+  &:hover {
+    opacity: 0.6;
+    transform: scale(1.1);
+    transition: 0.3s;
   }
 `;
 
@@ -230,11 +115,15 @@ function Main() {
   const [showModal, setShowModal] = useState(false);
 
   const user = useSelector((store) => store.userState.user);
-  const isLoading = useSelector((store) => store.articelsState.isLoading);
+  const { isLoading, articles } = useSelector((store) => store.articelsState);
 
   function handleClick() {
     setShowModal((prev) => !prev);
   }
+
+  useEffect(function () {
+    getArticlesAPI();
+  }, []);
 
   return (
     <Container>
@@ -249,9 +138,42 @@ function Main() {
             Start a post
           </button>
         </div>
+
+        <div>
+          <button>
+            <img src="/images/photo-icon.svg" alt="photo icon" />
+            <span>Photo</span>
+          </button>
+
+          <button>
+            <img src="/images/video-icon.svg" alt="video icon" />
+            <span>Video</span>
+          </button>
+
+          <button>
+            <img src="/images/event-icon.svg" alt="event icon" />
+            <span>Event</span>
+          </button>
+
+          <button>
+            <img src="/images/article-icon.svg" alt="article icon" />
+            <span>Write Article</span>
+          </button>
+        </div>
       </ShareBox>
 
-      <Content></Content>
+      {articles?.length === 0 ? (
+        <EmtpyPosts>There are no articles</EmtpyPosts>
+      ) : (
+        <Content>
+          {isLoading && <img src="images/loader.svg" alt="loading icon" />}
+
+          {articles?.length > 0 &&
+            articles.map((article, index) => (
+              <ArticleItems article={article} key={index} />
+            ))}
+        </Content>
+      )}
 
       <PostModal showModal={showModal} handleClick={handleClick} />
     </Container>

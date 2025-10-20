@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import ReactPlayer from "react-player";
+import { Timestamp } from "firebase/firestore";
+import { useDispatch } from "react-redux";
+import postArticlesAPI from "../service/articlesAPI";
 
 const Container = styled.div`
   position: fixed;
@@ -203,6 +206,8 @@ function PostModal({ showModal, handleClick, listenCapturing = true }) {
 
   const user = useSelector((store) => store.userState.user);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     if (showModal && textAreaRef.current) {
       textAreaRef.current.focus();
@@ -260,6 +265,44 @@ function PostModal({ showModal, handleClick, listenCapturing = true }) {
         );
     }
   }, [handleClick, listenCapturing, showModal]);
+
+  async function handlePostArticles(e) {
+    e.preventDefault();
+
+    if (e.target !== e.currentTarget) {
+      return;
+    }
+
+    try {
+      const payload = {
+        image: shareImage,
+        video: videoLink,
+        user,
+        description: editorText,
+        timestamp: Timestamp.now(),
+      };
+
+      dispatch({ type: "set/isLoading/status", payload: true });
+
+      const articleId = await postArticlesAPI(payload);
+
+      dispatch({
+        type: "get/articles",
+        payload: {
+          ...payload,
+          id: articleId,
+          shareImage: payload.image ? "uploading..." : null,
+        },
+      });
+
+      reset();
+    } catch (error) {
+      console.error("Failed to post article:", error);
+      alert("Failed to post article: " + error.message);
+    } finally {
+      dispatch({ type: "set/isLoading/status", payload: false });
+    }
+  }
 
   return (
     <>
@@ -342,7 +385,9 @@ function PostModal({ showModal, handleClick, listenCapturing = true }) {
               </AttachAssets>
 
               {/* <PostButton disabled={!editorText && !shareImage && !videoLink}> */}
-              <PostButton disabled={!editorText}>Post</PostButton>
+              <PostButton onClick={handlePostArticles} disabled={!editorText}>
+                Post
+              </PostButton>
             </ShareCreation>
           </Content>
         </Container>
